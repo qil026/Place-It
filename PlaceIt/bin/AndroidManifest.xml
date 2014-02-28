@@ -33,9 +33,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<!--         <meta-data
+	        android:name="com.google.android.maps.v2.API_KEY"
+	        android:value="AIzaSyCsz_eoCknhhpw70ayXIdr03xF0LtklzDE" /> -->
         <meta-data
 	        android:name="com.google.android.maps.v2.API_KEY"
-	        android:value="AIzaSyCsz_eoCknhhpw70ayXIdr03xF0LtklzDE" />
+	        android:value="AIzaSyACVGaoQjElkpFumSpTdHH43W9YtPbM36U" />
     </application>
 
 </manifest>
