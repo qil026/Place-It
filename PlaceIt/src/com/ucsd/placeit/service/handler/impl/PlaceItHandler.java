@@ -1,6 +1,7 @@
 package com.ucsd.placeit.service.handler.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,6 +13,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.ucsd.placeit.model.IPlaceIt;
+import com.ucsd.placeit.model.PlaceItBank;
 import com.ucsd.placeit.model.PlaceItBank.PlaceItIterator;
 import com.ucsd.placeit.service.handler.IPlaceItHandler;
 import com.ucsd.placeit.util.Consts;
@@ -20,30 +22,124 @@ import edu.ucsd.cse.placeit.main.MainActivity;
 
 public class PlaceItHandler implements IPlaceItHandler {
 	private boolean mActivityEnabled;
-	private Context context;
-	
-	public void onLocationChanged(Location location) {
-		Log.d(Consts.TAG, "Location changed from service!");
-		ArrayList<IPlaceIt> newList = checkInProximity(location, Consts.ACTIVE);
+	private Context mContext;
+	/**
+	 * The list of placeIt's that entered the proximity previously.
+	 */
+	private List<IPlaceIt> mProximityList;
+	private List<IPlaceIt> mNewList;
+	/**
+	 * Constructor which creates new placeIt proximity list
+	 */
+	public PlaceItHandler(Context context) {
+		mProximityList = new ArrayList<IPlaceIt>();
+		mContext = context;
+	}
 
-		if (newList.size() > 0) {
+	/**
+	 * Called from the location service facade.
+	 * 
+	 * @param location
+	 */
+	public void onLocationChanged(Location location, PlaceItBank placeItBank) {
+		Log.d(Consts.TAG, "Location changed from service!");
+		// Creating a iterator
+		PlaceItIterator iterator = placeItBank.iterator(Consts.ACTIVE);
+
+		// Calling helper method to return a list of proximity
+		checkInProximity(location, iterator);
+		
+		// Create notifications based on the newList
+		createNotifications();
+	}
+
+	
+	/**
+	 * Create the notifications based on the newLists
+	 */
+	private void createNotifications() {
+		// Check that newList has something to return
+		if (mNewList.size() > 0) {
 			// Convert to a list of IDs
-			int size = newList.size();
+			int size = mNewList.size();
 			int[] idArray = new int[size];
 			for (int i = 0; i < size; i++) {
-				idArray[i] = newList.get(i).getId();
+				idArray[i] = mNewList.get(i).getId();
 				if (!mActivityEnabled) {
-					createNotification(newList.get(i));
+					createNotification(mNewList.get(i));
 				}
 				Log.d(Consts.OTHER_TAG, "USER MOVED INTO RADIUS OF "
-						+ newList.get(i).getTitle());
+						+ mNewList.get(i).getTitle());
 			}
 
 			// Passing the intent
 			Intent intent = new Intent(Consts.BROADCAST_ACTION);
 			intent.putExtra(Consts.EXTRA_IN_PROX_ID, idArray);
-			context.sendBroadcast(intent);
+			mContext.sendBroadcast(intent);
 
+		}
+	}
+
+	/**
+	 * Check the proximity of proximity of the location passed in
+	 * 
+	 * @param location
+	 * @param state
+	 * @return
+	 */
+	private void checkInProximity(Location location,
+			PlaceItIterator iterator) {
+		IPlaceIt placeIt;
+
+		// Where the distance is stored in the Location.distanceBetween method
+		float[] results = new float[1];
+
+		// Create a newList of PlaceIts
+		mNewList = new ArrayList<IPlaceIt>();
+		int count = 0;
+		boolean contains;
+		// Check to see whether there are more placeIts to compare
+		while (iterator.hasNext()) {
+			placeIt = iterator.next();
+			count++;
+
+			// Getting the distance between the location and each placeit of the
+			// iterator
+			Location.distanceBetween(location.getLatitude(),
+					location.getLongitude(), placeIt.getCoord().latitude,
+					placeIt.getCoord().longitude, results);
+
+			contains = false;
+			// Cycle through each of the placeIts in that are already near
+			if (results[0] < Consts.PLACEIT_RADIUS) {
+				// Check through the proximity list to see if it is inside
+				// already
+				for (int i = 0; i < mProximityList.size(); i++) {
+					// Expand proximity list
+					if (placeIt.equals(mProximityList.get(i))) {
+						Log.d(Consts.OTHER_TAG, "Already contained " + count
+								+ "id = " + placeIt.getId());
+						contains = true;
+						break; // to the outer loop
+					}
+				}
+				if (!contains) {
+					Log.d(Consts.OTHER_TAG,
+							"Added " + count + "id = " + placeIt.getId()
+									+ " , placeIt Name: " + placeIt.getTitle());
+					mProximityList.add(placeIt);
+					mNewList.add(placeIt);
+				}
+			} else {
+				// Shrink proximity list
+				for (int i = 0; i < mProximityList.size(); i++) {
+					if (placeIt.equals(mProximityList.get(i))) {
+						Log.d(Consts.OTHER_TAG, "Removed " + count + "id = "
+								+ placeIt.getId());
+						mProximityList.remove(i);
+					}
+				}
+			}
 		}
 	}
 
@@ -62,7 +158,8 @@ public class PlaceItHandler implements IPlaceItHandler {
 		String body = String.format(Consts.MESSAGE_NOTIFICATION,
 				placeIt.getTitle());
 
-		notificationManager = (NotificationManager) = context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager = (NotificationManager) mContext
+				.getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification notify = new Notification(
 				android.R.drawable.stat_notify_more, title,
 				System.currentTimeMillis());
@@ -72,79 +169,18 @@ public class PlaceItHandler implements IPlaceItHandler {
 		// getApplicationContext(), 0, new Intent(), 0);
 		/* Creates an explicit intent for an Activity in your app */
 
-		Intent resultIntent = new Intent(this, MainActivity.class);
+		Intent resultIntent = new Intent(mContext, MainActivity.class);
 		resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
 				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+
 		stackBuilder.addParentStack(MainActivity.class);
 		stackBuilder.addNextIntent(resultIntent);
 		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
 				PendingIntent.FLAG_UPDATE_CURRENT);
-		notify.setLatestEventInfo(context, subject, body,
-				resultPendingIntent);
+		notify.setLatestEventInfo(mContext, subject, body, resultPendingIntent);
 		notificationManager.notify(placeIt.getId(), notify);
-	}
-
-	/**
-	 * Check the proximity of proximity of the location passed in
-	 * 
-	 * @param location
-	 * @param state
-	 * @return
-	 */
-	private ArrayList<IPlaceIt> checkInProximity(Location location, int state) {
-		PlaceItIterator iterator = mPlaceItBank.iterator(Consts.ACTIVE);
-		IPlaceIt placeIt;
-		float[] results = new float[1];
-		ArrayList<IPlaceIt> newList = new ArrayList<IPlaceIt>();
-		int count = 0;
-		// Check to see whether there are more placeIts to compare
-		while (iterator.hasNext()) {
-			placeIt = iterator.next();
-			count++;
-			Location.distanceBetween(location.getLatitude(),
-					location.getLongitude(), placeIt.getCoord().latitude,
-					placeIt.getCoord().longitude, results);
-
-			// Log.d(Consts.OTHER_TAG,
-			// "Distance from placeIT: " + Float.toString(results[0]));
-
-			// Log.d(Consts.OTHER_TAG, "proximitysize" + mProximityList.size());
-
-			boolean contains = false;
-			// Cycle through each of the placeIts in that are already near
-			if (results[0] < Consts.PLACEIT_RADIUS) {
-				// Check through the proximity list to see if it is inside
-				// already
-				for (int i = 0; i < mProximityList.size(); i++) {
-					// Expand proximity list
-					if (placeIt.equals(mProximityList.get(i))) {
-						Log.d(Consts.OTHER_TAG, "Already contained " + count
-								+ "id = " + placeIt.getId());
-						contains = true;
-						break;
-					}
-				}
-				if (!contains) {
-					Log.d(Consts.OTHER_TAG,
-							"Added " + count + "id = " + placeIt.getId()
-									+ " , placeIt Name: " + placeIt.getTitle());
-					mProximityList.add(placeIt);
-					newList.add(placeIt);
-				}
-			} else {
-				// Shrink proximity list
-				for (int i = 0; i < mProximityList.size(); i++) {
-					if (placeIt.equals(mProximityList.get(i))) {
-						Log.d(Consts.OTHER_TAG, "Removed " + count + "id = "
-								+ placeIt.getId());
-						mProximityList.remove(i);
-					}
-				}
-			}
-		}
-		return newList;
 	}
 
 }
