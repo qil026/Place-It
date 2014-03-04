@@ -41,8 +41,6 @@ public final class Consts {
 	public static final int UPDATE_ADD = 2;
 	public static final int UPDATE_DELETE = 3;
 
-	public static final float PLACEIT_RADIUS = 800;
-	
 	//----- Create new place it Intent Code -----\\
 	public static final int CREATE_NEW_MARKER = 0;
 	public static final int RESULT_SUCCESS = 0;

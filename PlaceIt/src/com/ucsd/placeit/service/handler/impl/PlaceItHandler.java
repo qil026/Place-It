@@ -16,6 +16,7 @@ import com.ucsd.placeit.model.IPlaceIt;
 import com.ucsd.placeit.model.PlaceItBank;
 import com.ucsd.placeit.model.PlaceItBank.PlaceItIterator;
 import com.ucsd.placeit.service.handler.IPlaceItHandler;
+import com.ucsd.placeit.util.Cfg;
 import com.ucsd.placeit.util.Consts;
 
 import edu.ucsd.cse.placeit.main.MainActivity;
@@ -111,7 +112,7 @@ public class PlaceItHandler implements IPlaceItHandler {
 
 			contains = false;
 			// Cycle through each of the placeIts in that are already near
-			if (results[0] < Consts.PLACEIT_RADIUS) {
+			if (results[0] < Cfg.PLACEIT_RADIUS) {
 				// Check through the proximity list to see if it is inside
 				// already
 				for (int i = 0; i < mProximityList.size(); i++) {
