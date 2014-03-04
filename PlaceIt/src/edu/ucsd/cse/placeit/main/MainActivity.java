@@ -1,6 +1,5 @@
 package edu.ucsd.cse.placeit.main;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -13,29 +12,27 @@ import edu.ucsd.cse.placeit.uimodule.GoogleMapFragment;
 import edu.ucsd.cse.placeit.utility.CONST;
 import edu.ucsd.cse.placeit.utility.GoogleMapData;
 
-
 public class MainActivity extends FragmentActivity implements
-			OnFragmentEventListener{
-	
+		OnFragmentEventListener {
+
 	private boolean listenToMapClick;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		//Initialize variables
+
+		// Initialize variables
 		listenToMapClick = true;
 	}
-
 
 	// Observes the fragments
 	@Override
 	public void onFragmentEvent(int action, GoogleMapData data) {
-		switch (action){
-		case CONST.MAP_CLICK:					
+		switch (action) {
+		case CONST.MAP_CLICK:
 			// Start the "CreateNewPlaceItFragment"
-			if(listenToMapClick){ 
+			if (listenToMapClick) {
 				Bundle bundle = new Bundle();
 				bundle.putParcelable(CONST.LOCATION, data.getLocation());
 				displayFragment(new CreateNewLocPlaceIt(), bundle);
@@ -48,45 +45,46 @@ public class MainActivity extends FragmentActivity implements
 		case CONST.CREATE_SUBMIT:
 			// User creates a new location PlaceIt, add a marker to map
 			removeActiveFragment();
-			GoogleMapFragment fragment = (GoogleMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+			GoogleMapFragment fragment = (GoogleMapFragment) getSupportFragmentManager()
+					.findFragmentById(R.id.map);
 			fragment.performDuty(CONST.DISPLAY_MARKER, data);
 			break;
 		case CONST.CREATE_CANCEL:
 			// User cancels operation, remove
 			removeActiveFragment();
-			Toast.makeText(this, "Canceled creating new place-it", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Canceled creating new place-it",
+					Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
-	
-	
 
-	
-// ----------------------------------------------------------------------------
-// Private Methods: Display Fragments and Alerts
-	
-// Displays the pop up alert fragment
-//    DialogFragment newFragment = PlaceItAlertFragment.newInstance(R.string.hello_world);
-//    newFragment.show(getSupportFragmentManager(), "dialog");
-	private void removeActiveFragment(){
+	// ----------------------------------------------------------------------------
+	// Private Methods: Display Fragments and Alerts
+
+	// Displays the pop up alert fragment
+	// DialogFragment newFragment =
+	// PlaceItAlertFragment.newInstance(R.string.hello_world);
+	// newFragment.show(getSupportFragmentManager(), "dialog");
+	private void removeActiveFragment() {
 		getSupportFragmentManager().popBackStack();
 		listenToMapClick = true;
 	}
 
-
-	private void displayFragment(Fragment newFragment, Bundle bundle){
+	private void displayFragment(Fragment newFragment, Bundle bundle) {
 		listenToMapClick = false;
 		// Create new fragment and transaction
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		FragmentTransaction transaction = getSupportFragmentManager()
+				.beginTransaction();
 
 		// Add bundle to fragment
-		if(bundle != null) newFragment.setArguments(bundle);
-		
-		// Replace whatever is in the fragment_container view with this fragment,
+		if (bundle != null)
+			newFragment.setArguments(bundle);
+
+		// Replace whatever is in the fragment_container view with this
+		// fragment,
 		// and add the transaction to the back stack
 		transaction.replace(R.id.fragment_container, newFragment);
 		transaction.addToBackStack(null);
-		
 
 		// Commit the transaction
 		transaction.commit();
