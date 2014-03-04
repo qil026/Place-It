@@ -21,8 +21,6 @@ public final class Consts {
 	// A fast frequency ceiling in milliseconds
 	public static final long FASTEST_INTERVAL = MILLISECONDS_PER_SECOND
 			* FASTEST_INTERVAL_IN_SECONDS;
-
-	
 	
 	//----- Intent stuff -----\\
 	
@@ -62,6 +60,11 @@ public final class Consts {
 	//----- MESSAGES -----\\
 	public static final String MESSAGE_NOTIFICATION = "You are near %s. Please choose to accept or not.";
 	
+	
+	
+	//----- ACTIONS -----\\
+	public static final String BROADCAST_ACTION = "com.ucsd.placeit.main";
+
 	/**
 	 * The caller references the constants using <tt>Consts.EMPTY_STRING</tt>,
 	 * and so on. Thus, the caller should be prevented from constructing objects

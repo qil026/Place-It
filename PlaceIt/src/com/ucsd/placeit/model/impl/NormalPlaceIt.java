@@ -184,7 +184,7 @@ public class NormalPlaceIt implements IPlaceIt {
 	 * @param other
 	 * @return
 	 */
-	public boolean equals(NormalPlaceIt other) {
+	public boolean equals(IPlaceIt other) {
 		return mId == other.getId();
 	}
 
