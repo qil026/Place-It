@@ -6,11 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.widget.Toast;
 import edu.ucsd.cse.placeit.R;
-import edu.ucsd.cse.placeit.model.OnFragmentEventListener;
-import edu.ucsd.cse.placeit.uimodule.CreateNewLocPlaceIt;
 import edu.ucsd.cse.placeit.uimodule.GoogleMapFragment;
-import edu.ucsd.cse.placeit.utility.CONST;
-import edu.ucsd.cse.placeit.utility.GoogleMapData;
 
 public class MainActivity extends FragmentActivity implements
 		OnFragmentEventListener {

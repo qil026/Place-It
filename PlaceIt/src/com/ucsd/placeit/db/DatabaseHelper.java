@@ -1,0 +1,321 @@
+package com.ucsd.placeit.db;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.ucsd.placeit.model.impl.NormalPlaceIt;
+import com.ucsd.placeit.util.Consts;
+
+@SuppressLint("DefaultLocale")
+public class DatabaseHelper extends SQLiteOpenHelper {
+
+	// Logcat tag
+	private static final String LOG = "DatabaseHelper";
+
+	// Database Version
+	private static final int DATABASE_VERSION = 1;
+
+	// Database Name
+	private static final String DATABASE_NAME = "placeItsManager";
+
+	// Table Names
+	private static final String TABLE_PLACEIT = "placeIts";
+	// private static final String TABLE_TAG = "states";
+	// private static final String TABLE_PLACEIT_TAG = "placeIt_states";
+
+	// Common column names
+	private static final String KEY_ID = "id";
+
+	// PlaceIts Table - column names
+	private static final String KEY_TITLE = "title";
+	private static final String KEY_DESC = "desc";
+	private static final String KEY_STATE = "state";
+	private static final String KEY_LONGITUDE = "longitude";
+	private static final String KEY_LATITUDE = "latitude";
+	private static final String KEY_DATE_CREATED = "date_created";
+	private static final String KEY_DATE_TO_POST = "date_to_post";
+	private static final String KEY_DATE_FREQUENCY_START = "date_freq_start";
+	private static final String KEY_FREQUENCY = "frequency";
+	
+	private SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+			Locale.getDefault());
+
+	public DatabaseHelper(
+			Context context) {
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		// create required tables
+		String query = String.format(Queries.CREATE_TABLE_PLACEIT, TABLE_PLACEIT, KEY_ID,
+				KEY_TITLE, KEY_DESC, KEY_STATE, KEY_LONGITUDE, KEY_LATITUDE,
+				KEY_DATE_CREATED, KEY_DATE_TO_POST, KEY_DATE_FREQUENCY_START,
+				KEY_FREQUENCY);
+		Log.d(LOG, query);
+		
+		db.execSQL(query);
+		
+		String query2 = "create table tbl1(id int primary key, dt datetime default current_timestamp)";
+		db.execSQL(query2);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// On upgrade drop older tables
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLACEIT);
+		// Create new tables
+		onCreate(db);
+	}
+
+	// ------METHODS------\\
+
+	/*
+	 * Creating a placeIt
+	 */
+	public long createPlaceIt(NormalPlaceIt placeIt) {
+		Log.d(Consts.TAG, "databasehelper create a new placeit");
+		SQLiteDatabase db = this.getWritableDatabase();
+		Log.d(Consts.TAG, "Received a writable Database");
+		ContentValues values = new ContentValues();
+		values.put(KEY_TITLE, placeIt.getTitle());
+		values.put(KEY_DESC, placeIt.getDesc());
+		values.put(KEY_STATE, placeIt.getState());
+
+		LatLng coord = placeIt.getCoord();
+		values.put(KEY_LONGITUDE, coord.longitude);
+		values.put(KEY_LATITUDE, coord.latitude);
+
+		values.put(KEY_DATE_CREATED, mDateFormat.format(placeIt.getCreationDate()));
+		values.put(KEY_DATE_TO_POST, mDateFormat.format(placeIt.getPostDate()));
+		values.put(KEY_DATE_FREQUENCY_START,
+				mDateFormat.format(placeIt.getPostDate()));
+
+		values.put(KEY_FREQUENCY, placeIt.getFrequency());
+
+		// insert row
+		Log.d(Consts.TAG, "Before inserting into database");
+		long placeIt_id = db.insert(TABLE_PLACEIT, null, values);
+		Log.d(Consts.TAG, "intsert" + placeIt_id);
+
+		return placeIt_id;
+	}
+
+	/*
+	 * Get single placeIt based on the ID
+	 * @return PlaceIT
+	 */
+	@SuppressLint("DefaultLocale")
+	public NormalPlaceIt getPlaceIt(int placeItId) {
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		String selectQuery = String.format(Queries.SELECT_PLACEIT, TABLE_PLACEIT, KEY_ID, placeItId);
+
+		Log.e(Consts.TAG, selectQuery);
+
+		Cursor c = db.rawQuery(selectQuery, null);
+
+		//Only selecting the first
+		if (c != null)
+			c.moveToFirst();
+		
+		return addPlaceItFromDb(c);
+	}
+
+	/**
+	 * getting all placeIts
+	 * */
+	public List<NormalPlaceIt> getAllPlaceIts() {
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		List<NormalPlaceIt> placeIts = new ArrayList<NormalPlaceIt>();
+		String selectQuery = String.format(Queries.SELECT_ALL_PLACEIT,
+				TABLE_PLACEIT);
+
+		Log.e(LOG, selectQuery);
+
+		Cursor c = db.rawQuery(selectQuery, null);
+
+		// looping through all rows and adding to list
+		if (c.moveToFirst()) {
+			Log.e(LOG, "TABLE has stuff");
+
+			do {
+				placeIts.add(addPlaceItFromDb(c));
+			} while (c.moveToNext());
+		} else {
+			Log.e(LOG, "TABLE IS EMPTY");
+		}
+		return placeIts;
+	}
+
+	/**
+	 * getting all placeIts under single tag
+	 * */
+//	public List<PlaceIt> getAllPlaceItsByTag(String tag_name) {
+//		List<PlaceIt> placeIts = new ArrayList<PlaceIt>();
+//
+//		String selectQuery = "SELECT  * FROM " + TABLE_PLACEIT + " td, "
+//				+ TABLE_TAG + " tg, " + TABLE_PLACEIT_TAG + " tt WHERE tg."
+//				+ KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
+//				+ " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
+//				+ "tt." + KEY_TODO_ID;
+//
+//		Log.e(LOG, selectQuery);
+//
+//		SQLiteDatabase db = this.getReadableDatabase();
+//		Cursor c = db.rawQuery(selectQuery, null);
+//
+//		// looping through all rows and adding to list
+//		if (c.moveToFirst()) {
+//			do {
+//				PlaceIt td = new PlaceIt();
+//				td.setId(c.getInt((c.getColumnIndex(KEY_ID))));
+//				td.setNote((c.getString(c.getColumnIndex(KEY_TODO))));
+//				td.setCreatedAt(c.getString(c.getColumnIndex(KEY_CREATED_AT)));
+//
+//				// adding to placeIt list
+//				placeIts.add(td);
+//			} while (c.moveToNext());
+//		}
+//
+//		return placeIts;
+//	}
+
+	/*
+	 * getting placeIt count
+	 */
+	public int getPlaceItCount() {
+		String countQuery = String.format(Queries.SELECT_ALL_PLACEIT, TABLE_PLACEIT);
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.rawQuery(countQuery, null);
+		
+		int count = cursor.getCount();
+		cursor.close();
+
+		// return count
+		return count;
+	}
+
+	/*
+	 * Updating a placeIt
+	 */
+	@SuppressLint("DefaultLocale")
+	public int updatePlaceIt(NormalPlaceIt placeIt) {
+		SQLiteDatabase db = this.getWritableDatabase();
+
+//		ContentValues values = new ContentValues();
+		
+		int placeItId = placeIt.getId();
+		String title = placeIt.getTitle();
+		String desc = placeIt.getDesc();
+		int state = placeIt.getState();
+		LatLng coord = placeIt.getCoord();
+		double longitude = coord.longitude;
+		double latitude = coord.latitude;
+		String created = mDateFormat.format(placeIt.getCreationDate());
+		String posted = mDateFormat.format(placeIt.getPostDate());
+		String freqStart = mDateFormat.format(placeIt.getPostDate());
+		int frequency = placeIt.getFrequency();
+		
+		String updateQuery = String.format(Queries.UPDATE_PLACEIT,
+				TABLE_PLACEIT,
+				KEY_TITLE, title,
+				KEY_DESC, desc,
+				KEY_STATE, state,
+				KEY_LONGITUDE, longitude,
+				KEY_LATITUDE, latitude,
+				KEY_DATE_CREATED, created,
+				KEY_DATE_TO_POST, posted,
+				KEY_DATE_FREQUENCY_START, freqStart,
+				KEY_FREQUENCY, frequency,
+				KEY_ID, placeItId);
+
+		Log.e(LOG, updateQuery);
+		db.rawQuery(updateQuery, null);
+		return 0;
+	}
+
+	/**
+	 * Deleting a placeIt
+	 */
+	public void deletePlaceIt(int placeItId) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.delete(TABLE_PLACEIT, KEY_ID + " = ?",
+				new String[] { String.valueOf(placeItId) });
+	}
+	
+	
+	
+	public void changePlaceItState(int placeItId, int state) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		
+		//Just change the state of the query
+		String updateQuery = String.format(Queries.CHANGE_STATE_PLACEIT,
+				TABLE_PLACEIT,
+				KEY_STATE, state,
+				KEY_ID, placeItId);
+		
+		
+		Log.e(LOG, updateQuery);
+		db.rawQuery(updateQuery, null);
+	}
+	
+	/**
+	 * Private helper method retrieve single place it from a cursor
+	 * @param c 	the current cursor
+	 * @return
+	 */
+	private NormalPlaceIt addPlaceItFromDb(Cursor c) {
+		Log.d(LOG, "retreiving single placeit");
+		NormalPlaceIt placeIt = null;
+		int id = c.getInt(c.getColumnIndex(KEY_ID));
+		String title = c.getString(c.getColumnIndex(KEY_TITLE));
+		String desc = c.getString(c.getColumnIndex(KEY_DESC));
+		int state = c.getInt(c.getColumnIndex(KEY_STATE));
+		double longitude = c.getDouble(c.getColumnIndex(KEY_LONGITUDE));
+		double latitude = c.getDouble(c.getColumnIndex(KEY_LATITUDE));
+		LatLng coord = new LatLng(latitude, longitude);
+		try {
+			Date dateCreated = mDateFormat.parse(c.getString(c
+					.getColumnIndex(KEY_DATE_CREATED)));
+			Date datePosted = mDateFormat.parse(c.getString(c
+					.getColumnIndex(KEY_DATE_TO_POST)));
+//			Date dateFreqStart = mDateFormat.parse(c.getString(c
+//					.getColumnIndex(KEY_DATE_FREQUENCY_START)));
+
+			int frequency = c.getInt(c.getColumnIndex(KEY_FREQUENCY));
+
+			placeIt = new NormalPlaceIt(id, title, desc, state, coord, dateCreated,
+					datePosted, frequency);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return placeIt;
+	}
+
+
+	/**
+	 * Closing the database
+	 */
+	public void closeDB() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		if (db != null && db.isOpen())
+			db.close();
+	}
+
+}
