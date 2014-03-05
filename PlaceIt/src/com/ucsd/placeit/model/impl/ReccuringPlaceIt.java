@@ -1,32 +1,20 @@
 package com.ucsd.placeit.model.impl;
 
 import java.util.Date;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
-import com.ucsd.placeit.model.IPlaceIt;
+import com.ucsd.placeit.model.PlaceIt;
 
-public class ReccuringPlaceIt implements IPlaceIt {
-	private int mId;
-	private LatLng mCoord;
-	private String mTitle;
-	private String mDesc;
+public class ReccuringPlaceIt extends PlaceIt {
 	private int mExpiration;
-	private int mStartTime;
-	private Date creationDate;
-	private Date postDate;
-	private int mState;
 	private int mFrequency;
+	private LatLng mCoord;
 
-	public ReccuringPlaceIt(String title, String desc, int state, LatLng coord, Date dateCreated, Date datePosted, int frequency) {
-		mTitle = title;
-		mCoord = coord;
-		mDesc = desc;
-		mState = state;
-		creationDate = dateCreated;
-		postDate = datePosted;
-		mFrequency = frequency;
-	}
-
-	public ReccuringPlaceIt(int id, String title, String desc, int state, LatLng coord, Date dateCreated, Date datePosted, int frequency) {
+	public ReccuringPlaceIt(int id, String title, String desc, int state,
+			LatLng coord, Date dateCreated, Date datePosted, int frequency) {
 		mId = id;
 		mTitle = title;
 		mCoord = coord;
@@ -38,65 +26,14 @@ public class ReccuringPlaceIt implements IPlaceIt {
 	}
 
 	/**
-	 * @return the id
+	 * New Constructor
+	 * @param source
 	 */
-	public int getId() {
-		return mId;
-	}
-
-	/**
-	 * Sets the ID
-	 * 
-	 * @param id
-	 *            the ID to set
-	 */
-	public void setId(int id) {
-		mId = id;
-	}
-
-	/**
-	 * @return the coord
-	 */
-	public LatLng getCoord() {
-		return mCoord;
-	}
-
-	/**
-	 * @param coord
-	 *            the coord to set
-	 */
-	public void setCoord(LatLng coord) {
-		mCoord = coord;
-	}
-
-	/**
-	 * @return the title
-	 */
-	public String getTitle() {
-		return mTitle;
-	}
-
-	/**
-	 * @param title
-	 *            the title to set
-	 */
-	public void setTitle(String title) {
-		mTitle = title;
-	}
-
-	/**
-	 * @return the desc
-	 */
-	public String getDesc() {
-		return mDesc;
-	}
-
-	/**
-	 * @param desc
-	 *            the desc to set
-	 */
-	public void setDesc(String desc) {
-		mDesc = desc;
+	public ReccuringPlaceIt(Parcel source) {
+		source = super.readFromParcel(source);
+		mExpiration = source.readInt();
+		mFrequency = source.readInt();
+		mCoord = new LatLng(source.readDouble(), source.readDouble());
 	}
 
 	/**
@@ -115,55 +52,6 @@ public class ReccuringPlaceIt implements IPlaceIt {
 	}
 
 	/**
-	 * @return the startTime
-	 */
-	public int getStartTime() {
-		return mStartTime;
-	}
-
-	/**
-	 * @param startTime
-	 *            the startTime to set
-	 */
-	public void setStartTime(int startTime) {
-		this.mStartTime = startTime;
-	}
-
-	/**
-	 * @return the date
-	 */
-	public Date getCreationDate() {
-		return creationDate;
-	}
-
-	public Date getPostDate() {
-		return postDate;
-	}
-
-	public void setCreationDate(Date date) {
-		creationDate = date;
-	}
-
-	public void setPostDate(Date date) {
-		postDate = date;
-	}
-
-	/**
-	 * @return the state
-	 */
-	public int getState() {
-		return mState;
-	}
-
-	/**
-	 * @param state
-	 *            the state to set
-	 */
-	public void setState(int state) {
-		mState = state;
-	}
-
-	/**
 	 * @return the frequency
 	 */
 	public int getFrequency() {
@@ -179,13 +67,30 @@ public class ReccuringPlaceIt implements IPlaceIt {
 	}
 
 	/**
-	 * Check if two placeIts are equal based on their ID's
+	 * It will be required during un-marshaling data stored in a Parcel
 	 * 
-	 * @param other
-	 * @return
+	 * @author prasanta
 	 */
-	public boolean equals(ReccuringPlaceIt other) {
-		return mId == other.getId();
+	public class MyCreator implements Parcelable.Creator<PlaceIt> {
+		public PlaceIt createFromParcel(Parcel source) {
+			return new ReccuringPlaceIt(source);
+		}
+
+		public PlaceIt[] newArray(int size) {
+			return new PlaceIt[size];
+		}
+	}
+
+	/**
+	 * Writes to the parcel
+	 */
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest = super.writeToParcelInit(dest);
+		dest.writeInt(mExpiration);
+		dest.writeInt(mFrequency);
+		dest.writeDouble(mCoord.latitude);
+		dest.writeDouble(mCoord.longitude);
 	}
 
 }

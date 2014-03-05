@@ -1,5 +1,7 @@
 package com.ucsd.placeit.util;
 
+import android.R.integer;
+
 public final class Consts {
 	/** TAG to use for debugging */
 	public static final String TAG = "PlaceIt";
@@ -9,6 +11,11 @@ public final class Consts {
 	public static final int COMPLETE = 2;
 	public static final int SLEEP = 3;
 
+	
+	public static final int TYPE_NORMAL = 1;
+	public static final int TYPE_CATEGORICAL = 2;
+	public static final int TYPE_RECURRING = 3;
+	
 	// Milliseconds per second
 	private static final int MILLISECONDS_PER_SECOND = 1000;
 	// Update frequency in seconds
@@ -58,7 +65,9 @@ public final class Consts {
 	//----- MESSAGES -----\\
 	public static final String MESSAGE_NOTIFICATION = "You are near %s. Please choose to accept or not.";
 	
-	
+	//----- DATE STUFF -----\\
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:s";
+
 	
 	//----- ACTIONS -----\\
 	public static final String BROADCAST_ACTION = "com.ucsd.placeit.main";

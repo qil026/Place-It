@@ -6,6 +6,6 @@ import com.ucsd.placeit.model.impl.NormalPlaceIt;
 
 
 public interface PlaceItIterable {
-	public Iterator<NormalPlaceIt> iterator();
-	public Iterator<NormalPlaceIt> iterator(int state);
+	public Iterator<PlaceIt> iterator();
+	public Iterator<PlaceIt> iterator(int state);
 }

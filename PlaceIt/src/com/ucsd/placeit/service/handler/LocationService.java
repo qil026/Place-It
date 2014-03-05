@@ -26,7 +26,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.ucsd.placeit.model.IPlaceIt;
+import com.ucsd.placeit.model.PlaceIt;
 import com.ucsd.placeit.model.PlaceItBank;
 import com.ucsd.placeit.model.PlaceItBank.PlaceItIterator;
 import com.ucsd.placeit.model.PlaceItBankListener;

@@ -1,57 +1,36 @@
 package com.ucsd.placeit.model.impl;
 
 import java.util.Date;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
-import com.ucsd.placeit.model.IPlaceIt;
+import com.ucsd.placeit.model.PlaceIt;
 
-public class NormalPlaceIt implements IPlaceIt {
-	private int mId;
+public class NormalPlaceIt extends PlaceIt {
+	/** Stores the coordinates */
 	private LatLng mCoord;
-	private String mTitle;
-	private String mDesc;
-	private int mExpiration;
-	private int mStartTime;
-	private Date creationDate;
-	private Date postDate;
-	private int mState;
-	private int mFrequency;
-
-	public NormalPlaceIt(String title, String desc, int state, LatLng coord, Date dateCreated, Date datePosted, int frequency) {
-		mTitle = title;
-		mCoord = coord;
-		mDesc = desc;
-		mState = state;
-		creationDate = dateCreated;
-		postDate = datePosted;
-		mFrequency = frequency;
-	}
-
-	public NormalPlaceIt(int id, String title, String desc, int state, LatLng coord, Date dateCreated, Date datePosted, int frequency) {
-		mId = id;
-		mTitle = title;
-		mCoord = coord;
-		mDesc = desc;
-		mState = state;
-		creationDate = dateCreated;
-		postDate = datePosted;
-		mFrequency = frequency;
-	}
 
 	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return mId;
-	}
-
-	/**
-	 * Sets the ID
+	 * Generate placeIt from parcel
 	 * 
-	 * @param id
-	 *            the ID to set
+	 * @param parcel
 	 */
-	public void setId(int id) {
+	public NormalPlaceIt(Parcel parcel) {
+		parcel = super.readFromParcel(parcel);
+		mCoord = new LatLng(parcel.readDouble(), parcel.readDouble());
+	}
+
+	public NormalPlaceIt(int id, String title, String desc, int state,
+			LatLng coord, Date dateCreated, Date datePosted) {
 		mId = id;
+		mTitle = title;
+		mCoord = coord;
+		mDesc = desc;
+		mState = state;
+		creationDate = dateCreated;
+		postDate = datePosted;
 	}
 
 	/**
@@ -70,122 +49,28 @@ public class NormalPlaceIt implements IPlaceIt {
 	}
 
 	/**
-	 * @return the title
+	 * Writes to the parcel
 	 */
-	public String getTitle() {
-		return mTitle;
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest = super.writeToParcelInit(dest);
+		dest.writeDouble(mCoord.latitude);
+		dest.writeDouble(mCoord.longitude);
 	}
 
 	/**
-	 * @param title
-	 *            the title to set
-	 */
-	public void setTitle(String title) {
-		mTitle = title;
-	}
-
-	/**
-	 * @return the desc
-	 */
-	public String getDesc() {
-		return mDesc;
-	}
-
-	/**
-	 * @param desc
-	 *            the desc to set
-	 */
-	public void setDesc(String desc) {
-		mDesc = desc;
-	}
-
-	/**
-	 * @return the expiration
-	 */
-	public int getExpiration() {
-		return mExpiration;
-	}
-
-	/**
-	 * @param expiration
-	 *            the expiration to set
-	 */
-	public void setExpiration(int expiration) {
-		this.mExpiration = expiration;
-	}
-
-	/**
-	 * @return the startTime
-	 */
-	public int getStartTime() {
-		return mStartTime;
-	}
-
-	/**
-	 * @param startTime
-	 *            the startTime to set
-	 */
-	public void setStartTime(int startTime) {
-		this.mStartTime = startTime;
-	}
-
-	/**
-	 * @return the date
-	 */
-	public Date getCreationDate() {
-		return creationDate;
-	}
-
-	public Date getPostDate() {
-		return postDate;
-	}
-
-	public void setCreationDate(Date date) {
-		creationDate = date;
-	}
-
-	public void setPostDate(Date date) {
-		postDate = date;
-	}
-
-	/**
-	 * @return the state
-	 */
-	public int getState() {
-		return mState;
-	}
-
-	/**
-	 * @param state
-	 *            the state to set
-	 */
-	public void setState(int state) {
-		mState = state;
-	}
-
-	/**
-	 * @return the frequency
-	 */
-	public int getFrequency() {
-		return mFrequency;
-	}
-
-	/**
-	 * @param frequency
-	 *            the frequency to set
-	 */
-	public void setFrequency(int frequency) {
-		mFrequency = frequency;
-	}
-
-	/**
-	 * Check if two placeIts are equal based on their ID's
+	 * It will be required during un-marshaling data stored in a Parcel
 	 * 
-	 * @param other
-	 * @return
+	 * @author prasanta
 	 */
-	public boolean equals(IPlaceIt other) {
-		return mId == other.getId();
+	public class MyCreator implements Parcelable.Creator<PlaceIt> {
+		public PlaceIt createFromParcel(Parcel source) {
+			return new NormalPlaceIt(source);
+		}
+
+		public PlaceIt[] newArray(int size) {
+			return new PlaceIt[size];
+		}
 	}
 
 }

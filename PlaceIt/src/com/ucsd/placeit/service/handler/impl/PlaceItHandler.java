@@ -12,7 +12,7 @@ import android.location.Location;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
-import com.ucsd.placeit.model.IPlaceIt;
+import com.ucsd.placeit.model.PlaceIt;
 import com.ucsd.placeit.model.PlaceItBank;
 import com.ucsd.placeit.model.PlaceItBank.PlaceItIterator;
 import com.ucsd.placeit.service.handler.IPlaceItHandler;
@@ -27,13 +27,13 @@ public class PlaceItHandler implements IPlaceItHandler {
 	/**
 	 * The list of placeIt's that entered the proximity previously.
 	 */
-	private List<IPlaceIt> mProximityList;
-	private List<IPlaceIt> mNewList;
+	private List<PlaceIt> mProximityList;
+	private List<PlaceIt> mNewList;
 	/**
 	 * Constructor which creates new placeIt proximity list
 	 */
 	public PlaceItHandler(Context context) {
-		mProximityList = new ArrayList<IPlaceIt>();
+		mProximityList = new ArrayList<PlaceIt>();
 		mContext = context;
 	}
 
@@ -90,13 +90,13 @@ public class PlaceItHandler implements IPlaceItHandler {
 	 */
 	private void checkInProximity(Location location,
 			PlaceItIterator iterator) {
-		IPlaceIt placeIt;
+		PlaceIt placeIt;
 
 		// Where the distance is stored in the Location.distanceBetween method
 		float[] results = new float[1];
 
 		// Create a newList of PlaceIts
-		mNewList = new ArrayList<IPlaceIt>();
+		mNewList = new ArrayList<PlaceIt>();
 		int count = 0;
 		boolean contains;
 		// Check to see whether there are more placeIts to compare
@@ -151,7 +151,7 @@ public class PlaceItHandler implements IPlaceItHandler {
 	 * @param placeIt
 	 */
 	@SuppressWarnings("deprecation")
-	private void createNotification(IPlaceIt placeIt) {
+	private void createNotification(PlaceIt placeIt) {
 		Log.d(Consts.TAG_NOTIFY, "create new notification");
 		NotificationManager notificationManager;
 		String title = placeIt.getTitle();

@@ -1,12 +1,12 @@
 package com.ucsd.placeit.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.ucsd.placeit.model.impl.NormalPlaceIt;
 import com.ucsd.placeit.service.CentralLogicController;
 import com.ucsd.placeit.util.Consts;
 
@@ -23,17 +23,15 @@ import com.ucsd.placeit.util.Consts;
 public class PlaceItBank implements PlaceItIterable {
 
 	/** Stores all the placeIts */
-	private List<NormalPlaceIt> mPlaceItBank;
-	private CentralLogicController mCic;
+	private List<PlaceIt> mPlaceItBank;
 
-	public PlaceItBank(Context context) {
-		mCic = CentralLogicController.getInstance(context);
+	public PlaceItBank() {
 		//Initialize new placeItBank from DB
-		mPlaceItBank = mCic.getAllPlaceIts();
+		mPlaceItBank = new ArrayList<PlaceIt>();
 
 	}
 
-	public PlaceItBank(List<NormalPlaceIt> placeItBank, Context context) {
+	public PlaceItBank(List<PlaceIt> placeItBank) {
 		mPlaceItBank = placeItBank;
 	}
 
@@ -43,7 +41,7 @@ public class PlaceItBank implements PlaceItIterable {
 	 * @param placeIt
 	 *            the PlaceIt that needs to be added
 	 */
-	public void addPlaceIt(NormalPlaceIt placeIt) {
+	public void addPlaceIt(PlaceIt placeIt) {
 		mPlaceItBank.add(placeIt);
 	}
 
@@ -64,7 +62,7 @@ public class PlaceItBank implements PlaceItIterable {
 	 * @author Kevin
 	 * 
 	 */
-	public class PlaceItIterator implements Iterator<NormalPlaceIt> {
+	public class PlaceItIterator implements Iterator<PlaceIt> {
 		private int size;
 		private int curr;
 		private int state;
@@ -104,7 +102,7 @@ public class PlaceItBank implements PlaceItIterable {
 		 *             size())
 		 */
 		@Override
-		public NormalPlaceIt next() {
+		public PlaceIt next() {
 			curr++;
 			return mPlaceItBank.get(curr);
 		}
@@ -126,7 +124,7 @@ public class PlaceItBank implements PlaceItIterable {
 	 * @return an array of PlaceIts within the location.
 	 * 
 	 */
-	public NormalPlaceIt[] insideRadius(LatLng location, double radius) {
+	public PlaceIt[] insideRadius(LatLng location, double radius) {
 		// TODO
 		return null;
 	}
@@ -140,8 +138,8 @@ public class PlaceItBank implements PlaceItIterable {
 	 * @return the PlaceIt with the corresponding ID. NULL if PlaceIt is not
 	 *         found.
 	 */
-	public NormalPlaceIt getPlaceIt(int id) {
-		for (NormalPlaceIt placeIt : mPlaceItBank) {
+	public PlaceIt getPlaceIt(int id) {
+		for (PlaceIt placeIt : mPlaceItBank) {
 			if (placeIt.getId() == id) {
 				return placeIt;
 			}
@@ -172,24 +170,24 @@ public class PlaceItBank implements PlaceItIterable {
 	 * @param updateState
 	 * @param option
 	 */
-	public void updatePlaceItBank(int placeItId, int updateState, int option) {
-		switch (updateState) {
-		case Consts.UPDATE_STATE_UPDATE:
-			mPlaceItBank.get(placeItId).setState(option);
-			break;
-		case Consts.UPDATE_ADD:
-			NormalPlaceIt placeIt = mCic.getPlaceIt(placeItId);
-			mPlaceItBank.add(placeIt);
-			break;
-		case Consts.UPDATE_DELETE:
-			try {
-				mPlaceItBank.remove(placeItId);
-			} catch (IndexOutOfBoundsException e) {
-				Log.e(Consts.TAG, "CANNOT DELETE PlaceIt #" + placeItId
-						+ " . Index out of bounds ");
-			}
-		}
-	}
+//	public void updatePlaceItBank(int placeItId, int updateState, int option) {
+//		switch (updateState) {
+//		case Consts.UPDATE_STATE_UPDATE:
+//			mPlaceItBank.get(placeItId).setState(option);
+//			break;
+//		case Consts.UPDATE_ADD:
+////			IPlaceIt placeIt = mCic.getPlaceIt(placeItId);
+//			mPlaceItBank.add(placeIt);
+//			break;
+//		case Consts.UPDATE_DELETE:
+//			try {
+//				mPlaceItBank.remove(placeItId);
+//			} catch (IndexOutOfBoundsException e) {
+//				Log.e(Consts.TAG, "CANNOT DELETE PlaceIt #" + placeItId
+//						+ " . Index out of bounds ");
+//			}
+//		}
+//	}
 
 	/**
 	 * Returns size of the PlaceItBank
