@@ -33,13 +33,14 @@ public class CategoricalPlaceIt extends PlaceIt {
 	}
 
 	public CategoricalPlaceIt(int id, String title, String desc, 
-			int state, Date dateCreated, Date datePosted) {
+			int state, Date dateCreated, Date datePosted, String[] categories) {
 		mId = id;
 		mTitle = title;
 		mDesc = desc;
 		mState = state;
-		creationDate = dateCreated;
-		postDate = datePosted;
+		mCreationDate = dateCreated;
+		mPostDate = datePosted;
+		mCategories = categories;
 	}
 
 	@Override

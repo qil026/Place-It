@@ -20,9 +20,9 @@ import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
 import com.ucsd.placeit.model.PlaceIt;
 import com.ucsd.placeit.model.impl.CategoricalPlaceIt;
-import com.ucsd.placeit.model.impl.IPlaceIt;
 import com.ucsd.placeit.model.impl.NormalPlaceIt;
 import com.ucsd.placeit.model.impl.ReccuringPlaceIt;
+import com.ucsd.placeit.service.handler.impl.CategoryHandler;
 import com.ucsd.placeit.util.Consts;
 
 @SuppressLint("DefaultLocale")
@@ -137,7 +137,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			LatLng coord = ((ReccuringPlaceIt) placeIt).getCoord();
 			values.put(KEY_LONGITUDE, coord.longitude);
 			values.put(KEY_LATITUDE, coord.latitude);
-			values.put(KEY_FREQUENCY, ((ReccuringPlaceIt)placeIt).getFrequency());
+			values.put(KEY_FREQUENCY,
+					((ReccuringPlaceIt) placeIt).getFrequency());
 		}
 
 		// insert row
@@ -286,20 +287,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		String title = placeIt.getTitle();
 		String desc = placeIt.getDesc();
 		int state = placeIt.getState();
-		LatLng coord = placeIt.getCoord();
-		double longitude = coord.longitude;
-		double latitude = coord.latitude;
+
 		String created = mDateFormat.format(placeIt.getCreationDate());
 		String posted = mDateFormat.format(placeIt.getPostDate());
 		String freqStart = mDateFormat.format(placeIt.getPostDate());
-		int frequency = placeIt.getFrequency();
+		String[] category = new String[Consts.NUM_CAT];
+		double longitude;
+		double latitude;
+		int frequency;
+		
+		if (placeIt instanceof NormalPlaceIt) {
+			LatLng coord = ((NormalPlaceIt) placeIt).getCoord();
+			longitude = coord.longitude;
+			latitude = coord.latitude;
+
+		} else if (placeIt instanceof CategoricalPlaceIt) {
+			longitude = 0;
+			latitude = 0;
+			try {
+				String[] pCategory = ((CategoricalPlaceIt) placeIt)
+						.getCategories();
+				for (int i = 0; i < 3; i++) {
+					category[i] = pCategory[i];
+				}
+			} catch (ArrayIndexOutOfBoundsException e) {
+			}
+
+		} else if (placeIt instanceof ReccuringPlaceIt) {
+			LatLng coord = ((ReccuringPlaceIt) placeIt).getCoord();
+			longitude = coord.longitude;
+			latitude = coord.latitude;
+			frequency = ((ReccuringPlaceIt) placeIt).getFrequency();
+
+		}
 
 		String updateQuery = String.format(Queries.UPDATE_PLACEIT,
 				TABLE_PLACEIT, KEY_TITLE, title, KEY_DESC, desc, KEY_STATE,
 				state, KEY_LONGITUDE, longitude, KEY_LATITUDE, latitude,
 				KEY_DATE_CREATED, created, KEY_DATE_TO_POST, posted,
 				KEY_DATE_FREQUENCY_START, freqStart, KEY_FREQUENCY, frequency,
-				KEY_ID, placeItId);
+				KEY_CAT_1, category[0], KEY_CAT_2, category[1], KEY_CAT_3,
+				category[2], KEY_ID, placeItId);
 
 		Log.e(LOG, updateQuery);
 		db.rawQuery(updateQuery, null);
@@ -353,6 +381,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 			int frequency = c.getInt(c.getColumnIndex(KEY_FREQUENCY));
 			int type = c.getInt(c.getColumnIndex(KEY_TYPE));
+			String[] categories = new String[3];
+			categories[0] = c.getString(c.getColumnIndex(KEY_CAT_1));
+			categories[1] = c.getString(c.getColumnIndex(KEY_CAT_2));
+			categories[2] = c.getString(c.getColumnIndex(KEY_CAT_3));
 
 			switch (type) {
 			case Consts.TYPE_NORMAL:
@@ -361,7 +393,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				break;
 			case Consts.TYPE_CATEGORICAL:
 				placeIt = new CategoricalPlaceIt(id, title, desc, state,
-						dateCreated, datePosted, frequency);
+						dateCreated, datePosted, categories);
 				break;
 			case Consts.TYPE_RECURRING:
 				placeIt = new ReccuringPlaceIt(id, title, desc, state, coord,

@@ -68,7 +68,7 @@ public final class Consts {
 	//----- DATE STUFF -----\\
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:s";
 
-	
+	public static final int NUM_CAT = 3;
 	//----- ACTIONS -----\\
 	public static final String BROADCAST_ACTION = "com.ucsd.placeit.main";
 

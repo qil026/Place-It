@@ -20,13 +20,14 @@ public class ReccuringPlaceIt extends PlaceIt {
 		mCoord = coord;
 		mDesc = desc;
 		mState = state;
-		creationDate = dateCreated;
-		postDate = datePosted;
+		mCreationDate = dateCreated;
+		mPostDate = datePosted;
 		mFrequency = frequency;
 	}
 
 	/**
 	 * New Constructor
+	 * 
 	 * @param source
 	 */
 	public ReccuringPlaceIt(Parcel source) {
@@ -64,6 +65,21 @@ public class ReccuringPlaceIt extends PlaceIt {
 	 */
 	public void setFrequency(int frequency) {
 		mFrequency = frequency;
+	}
+
+	/**
+	 * @return the coord
+	 */
+	public LatLng getCoord() {
+		return mCoord;
+	}
+
+	/**
+	 * @param coord
+	 *            the coord to set
+	 */
+	public void setCoord(LatLng coord) {
+		mCoord = coord;
 	}
 
 	/**

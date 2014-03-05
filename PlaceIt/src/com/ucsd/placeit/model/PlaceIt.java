@@ -15,11 +15,12 @@ abstract public class PlaceIt implements Parcelable {
 	protected int mId;
 	protected String mTitle;
 	protected String mDesc;
-	protected Date creationDate;
-	protected Date postDate;
+	protected Date mCreationDate;
+	protected Date mPostDate;
 	protected int mState;
 	protected int mStartTime;
 
+	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat dFormat = new SimpleDateFormat(Consts.DATE_FORMAT);
 
 	/**
@@ -88,19 +89,19 @@ abstract public class PlaceIt implements Parcelable {
 	 * @return the date
 	 */
 	public Date getCreationDate() {
-		return creationDate;
+		return mCreationDate;
 	}
 
 	public Date getPostDate() {
-		return postDate;
+		return mPostDate;
 	}
 
 	public void setCreationDate(Date date) {
-		creationDate = date;
+		mCreationDate = date;
 	}
 
 	public void setPostDate(Date date) {
-		postDate = date;
+		mPostDate = date;
 	}
 
 	/**
@@ -146,8 +147,8 @@ abstract public class PlaceIt implements Parcelable {
 		dest.writeString(mTitle);
 		dest.writeString(mDesc);
 
-		dest.writeString(dFormat.format(creationDate));
-		dest.writeString(dFormat.format(postDate));
+		dest.writeString(dFormat.format(mCreationDate));
+		dest.writeString(dFormat.format(mPostDate));
 		dest.writeInt(mState);
 		dest.writeInt(mStartTime);
 		return dest;
@@ -155,6 +156,7 @@ abstract public class PlaceIt implements Parcelable {
 
 	/**
 	 * Read partially from source parcel
+	 * 
 	 * @param source
 	 * @return
 	 */
@@ -164,13 +166,13 @@ abstract public class PlaceIt implements Parcelable {
 		mDesc = source.readString();
 
 		try {
-			creationDate = dFormat.parse(source.readString());
-			postDate = dFormat.parse(source.readString());
+			mCreationDate = dFormat.parse(source.readString());
+			mPostDate = dFormat.parse(source.readString());
 		} catch (ParseException e) {
 			Log.d(Consts.TAG, "error in logging date");
 			e.printStackTrace();
 		}
-		
+
 		mState = source.readInt();
 		mStartTime = source.readInt();
 		return source;

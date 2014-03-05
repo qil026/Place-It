@@ -29,8 +29,8 @@ public class NormalPlaceIt extends PlaceIt {
 		mCoord = coord;
 		mDesc = desc;
 		mState = state;
-		creationDate = dateCreated;
-		postDate = datePosted;
+		mCreationDate = dateCreated;
+		mPostDate = datePosted;
 	}
 
 	/**
