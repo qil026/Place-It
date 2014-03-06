@@ -30,6 +30,7 @@ import com.ucsd.placeit.model.PlaceIt;
 import com.ucsd.placeit.model.PlaceItBank;
 import com.ucsd.placeit.model.PlaceItBank.PlaceItIterator;
 import com.ucsd.placeit.model.PlaceItBankListener;
+import com.ucsd.placeit.service.handler.impl.LocationHandler;
 import com.ucsd.placeit.service.handler.impl.PlaceItHandler;
 import com.ucsd.placeit.util.Consts;
 
@@ -64,23 +65,22 @@ public class LocationService extends Service implements
 	 * Place it bank to store all the current placeIts
 	 */
 	private PlaceItBank mPlaceItBank;
-	
-	//----- Handler List -----\\
+
+	// ----- Handler List -----\\
+	private ILocationHandler mLocationHandler;
 	private IPlaceItHandler mPlaceItHandler;
-	
-	
+	private ICategoryHandler mCategoryHandler;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
-		// Initialize handlers
-		mPlaceItHandler = new PlaceItHandler(getApplicationContext());
-		
-		
-		// Initializes new placeIt bank
-		mPlaceItBank = new PlaceItBank(getApplicationContext());
 
-		
+		// Initialize handlers
+		mLocationHandler = new LocationHandler(getApplicationContext());
+		mPlaceItHandler = new PlaceItHandler(getApplicationContext());
+		// Initializes new placeIt bank
+//		mPlaceItBank = new PlaceItBank(getApplicationContext());
+
 		Log.d(Consts.TAG, "Location service create");
 
 		int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -102,25 +102,17 @@ public class LocationService extends Service implements
 
 		// Setting the activity active state
 		if (intent.hasExtra(Consts.EXTRA_ACTIVITY_ONLINE)) {
-			mActivityEnabled = intent.getExtras().getBoolean(
-					Consts.EXTRA_ACTIVITY_ONLINE);
-			Log.d(Consts.TAG_NOTIFY, "Activity is on? " + mActivityEnabled);
+			enableActivity(intent);
 		}
 
 		// Checking if the local db has to be updated
 		if (intent.hasExtra(Consts.EXTRA_UPDATE_ID)) {
-			Log.d(Consts.TAG_NOTIFY, "Updating of Service");
-
-			
-			int placeItId = intent.getExtras().getInt(
-					Consts.EXTRA_UPDATE_ID);
-			int updateState = intent.getExtras().getInt(
-					Consts.EXTRA_UPDATE_STATE);
-			int options = intent.getExtras().getInt(
-					Consts.EXTRA_UPDATE_OPTIONS, 0);
-			mPlaceItBank.updatePlaceItBank(placeItId, updateState, options);
+			Log.d(Consts.TAG_NOTIFY, "Updating from Service");
+			mPlaceItHandler.updatePlaceItState(intent);
 		}
 
+		
+		// Start requesting location updates
 		if (mLocationClient != null && mLocationClient.isConnected()) {
 			mLocationRequest = LocationRequest.create();
 			mLocationRequest
@@ -132,6 +124,16 @@ public class LocationService extends Service implements
 			mLocationClient.requestLocationUpdates(mLocationRequest, this);
 		}
 
+	}
+
+	/**
+	 * Chooses whether to enable or disable activity.
+	 * @param intent
+	 */
+	private void enableActivity(Intent intent) {
+		mActivityEnabled = intent.getExtras().getBoolean(
+				Consts.EXTRA_ACTIVITY_ONLINE);
+		Log.d(Consts.TAG_NOTIFY, "Activity is on: " + mActivityEnabled);
 	}
 
 	@Override
@@ -164,8 +166,8 @@ public class LocationService extends Service implements
 	}
 
 	/**
-	 * Function to show settings alert dialog
-	 * */
+	 * Function to show settings alert dialog if GPS is enabled or not
+	 **/
 	public void showSettingsAlert() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(
 				getApplicationContext());
@@ -205,7 +207,7 @@ public class LocationService extends Service implements
 	@Override
 	public void onLocationChanged(Location location) {
 		Log.d(Consts.TAG, "Location changed from service!");
-		mPlaceItHandler.onLocationChanged(location, mPlaceItBank);
+		mLocationHandler.onLocationChanged(location, mPlaceItBank);
 	}
 
 	@Override

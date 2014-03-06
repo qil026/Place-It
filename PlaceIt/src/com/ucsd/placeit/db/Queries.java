@@ -25,6 +25,9 @@ public final class Queries {
 	static final String SELECT_ALL_PLACEIT =
 			"SELECT * FROM %s";
 	
+	/**
+	 * Get the placeIt states 
+	 */
 	static final String SELECT_STATE_CAT_PLACEIT =
 			"SELECT * FROM %s" +
 			"WHERE %s = '%d'" +
@@ -34,8 +37,6 @@ public final class Queries {
 			"OR %s = '%s'" +
 			")";
 			
-			
-	
 	static final String UPDATE_PLACEIT = 
 			"UPDATE %s " +
 			"SET " +

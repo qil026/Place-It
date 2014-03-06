@@ -7,14 +7,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import android.R.integer;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.SyncStateContract.Columns;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -22,7 +20,6 @@ import com.ucsd.placeit.model.PlaceIt;
 import com.ucsd.placeit.model.impl.CategoricalPlaceIt;
 import com.ucsd.placeit.model.impl.NormalPlaceIt;
 import com.ucsd.placeit.model.impl.ReccuringPlaceIt;
-import com.ucsd.placeit.service.handler.impl.CategoryHandler;
 import com.ucsd.placeit.util.Consts;
 
 @SuppressLint("DefaultLocale")
@@ -199,14 +196,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Getting all placeIts
+	 * Getting all placeIts based on the state and category
+	 * 
+	 * @param state
+	 *            the state to pass in. 0 for any.
+	 * @param category
+	 *            the category to check for. null for any.
 	 * */
+	@SuppressLint("NewApi")
 	public List<PlaceIt> getAllPlaceIts(int state, String category) {
 		SQLiteDatabase db = this.getReadableDatabase();
+		String stateCheck = KEY_STATE;
+		// Category check to make sure it is not wildcard
+		if (category != null && !category.isEmpty()) {
+			category = "%";
+
+		}
+		// Do a state check
+		if (state == 0) {
+			state = 0;
+			stateCheck = "1";
+		}
+		
 
 		List<PlaceIt> placeIts = new ArrayList<PlaceIt>();
 		String selectQuery = String.format(Queries.SELECT_STATE_CAT_PLACEIT,
-				TABLE_PLACEIT, KEY_STATE, state, KEY_CAT_1, category,
+				TABLE_PLACEIT, stateCheck, state, KEY_CAT_1, category,
 				KEY_CAT_2, category, KEY_CAT_3, category);
 
 		Log.e(LOG, selectQuery);
@@ -295,7 +310,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		double longitude;
 		double latitude;
 		int frequency;
-		
+
 		if (placeIt instanceof NormalPlaceIt) {
 			LatLng coord = ((NormalPlaceIt) placeIt).getCoord();
 			longitude = coord.longitude;
@@ -333,6 +348,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.rawQuery(updateQuery, null);
 		return 0;
 	}
+	
+	
+	
 
 	/**
 	 * Deleting a placeIt

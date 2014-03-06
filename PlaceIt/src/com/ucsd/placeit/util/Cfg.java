@@ -1,5 +1,7 @@
 package com.ucsd.placeit.util;
 
+import com.ucsd.placeit.model.impl.NormalPlaceIt;
+
 /**
  * Class to hold all of the configurable information
  * @author Kevin
@@ -17,6 +19,7 @@ public class Cfg {
 	public static final float PLACEIT_RADIUS = 800;
 	//--------------------------\\
 	
+	PlaceIt shot = new NormalPlaceIt(parcel);
 	
 	
 	private Cfg() {
